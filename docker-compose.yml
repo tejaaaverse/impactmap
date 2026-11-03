@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DEBUG: "false"
+      DATABASE_URL: "sqlite+aiosqlite:////data/impactmap.db"
+      TEST_EXECUTION_TIMEOUT_SECONDS: "600"
+    volumes:
+      - impactmap-data:/data
+      # Demo repositories are mounted read-only. Scan /repositories/calculator
+      # from the containerised API.
+      - ./sample_repositories:/repositories:ro
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  impactmap-data:
