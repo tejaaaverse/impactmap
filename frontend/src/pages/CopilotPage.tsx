@@ -148,7 +148,11 @@ export function CopilotPage() {
 
   async function ask(question: string) {
     const message = question.trim();
-    if (!message || busy || !repoId) return;
+    // The default repository is selected in an effect, so a starter prompt can
+    // be clicked in the same commit that first renders it. Fall back to the
+    // first available repository so that early clicks are not silently dropped.
+    const targetRepoId = repoId || repositoriesList[0]?.id;
+    if (!message || busy || !targetRepoId) return;
     setBusy(true);
     setError(null);
     setDraft("");
@@ -171,7 +175,7 @@ export function CopilotPage() {
     setMessages((current) => [...current, optimistic]);
 
     try {
-      const response = await api.copilotChat(repoId, {
+      const response = await api.copilotChat(targetRepoId, {
         message,
         conversation_id: conversationId,
       });
